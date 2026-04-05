@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "DD0AE2E022DAB13100B68F05"
-               BuildableName = "JoyKeyMapper.app"
+               BuildableName = "JoyMapperPlus.app"
                BlueprintName = "JoyKeyMapper"
                ReferencedContainer = "container:JoyKeyMapper.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DD0AE2E022DAB13100B68F05"
-            BuildableName = "JoyMapperSilicon.app"
+               BuildableName = "JoyMapperPlus.app"
             BlueprintName = "JoyMapperSilicon"
             ReferencedContainer = "container:JoyMapperSilicon.xcodeproj">
          </BuildableReference>
@@ -54,7 +54,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DD0AE2E022DAB13100B68F05"
-            BuildableName = "JoyKeyMapper.app"
+            BuildableName = "JoyMapperPlus.app"
             BlueprintName = "JoyKeyMapper"
             ReferencedContainer = "container:JoyKeyMapper.xcodeproj">
          </BuildableReference>
@@ -71,7 +71,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "DD0AE2E022DAB13100B68F05"
-            BuildableName = "JoyKeyMapper.app"
+            BuildableName = "JoyMapperPlus.app"
             BlueprintName = "JoyKeyMapper"
             ReferencedContainer = "container:JoyKeyMapper.xcodeproj">
          </BuildableReference>

@@ -8,7 +8,7 @@
 
 import Cocoa
 
-let mainAppID = "jp.0spec.JoyKeyMapper"
+let mainAppID = "cn.coderzc.JoyMapperPlus"
 // let mainAppURL  = URL(string: "https://joyconmapper.0spec.jp")!
 
 @NSApplicationMain

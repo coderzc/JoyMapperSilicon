@@ -9,7 +9,7 @@
 import Foundation
 import ServiceManagement
 
-let helperAppBundleID = "jp.0spec.JoyKeyMapperLauncher"
+let helperAppBundleID = "cn.coderzc.JoyMapperPlusLauncher"
 
 class AppSettings {
     static var disconnectTime: Int {

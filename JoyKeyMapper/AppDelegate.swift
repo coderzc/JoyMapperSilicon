@@ -11,7 +11,7 @@ import ServiceManagement
 import UserNotifications
 import JoyConSwift
 
-let helperAppID: CFString = "cn.qibinc.JoyMapperSiliconLauncher" as CFString
+let helperAppID: CFString = "cn.coderzc.JoyMapperPlusLauncher" as CFString
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNotificationCenterDelegate {
@@ -203,7 +203,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
         }
 
         guard self.autoRescanTimer == nil else { return }
-        NSLog("[JoyMapperSilicon] Starting auto rescan (%@)", reason)
+        NSLog("[JoyMapperPlus] Starting auto rescan (%@)", reason)
 
         let timer = Timer(timeInterval: AppDelegate.autoRescanInterval, repeats: true) { [weak self] timer in
             guard let self = self else {
@@ -216,7 +216,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
                 return
             }
 
-            NSLog("[JoyMapperSilicon] Auto rescan tick")
+            NSLog("[JoyMapperPlus] Auto rescan tick")
             self.manager.rescanConnectedDevices()
         }
         RunLoop.main.add(timer, forMode: .common)
@@ -224,7 +224,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
     }
 
     @objc func rescanControllers(_ sender: Any?) {
-        NSLog("[JoyMapperSilicon] Rescanning controllers")
+        NSLog("[JoyMapperPlus] Rescanning controllers")
         self.startAutoRescan(reason: "manual")
         self.manager.rescanConnectedDevices()
     }

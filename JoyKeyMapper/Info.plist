@@ -27,7 +27,7 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>https://github.com/qibinc/JoyMapperSilicon</string>
+	<string>https://github.com/coderzc/JoyMapperSilicon</string>
 	<key>NSMainStoryboardFile</key>
 	<string>Main</string>
 	<key>NSPrincipalClass</key>

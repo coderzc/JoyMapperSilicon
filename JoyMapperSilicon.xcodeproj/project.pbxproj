@@ -85,12 +85,12 @@
 		DD0530602427AB6B0091B3C6 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/Main.storyboard; sourceTree = "<group>"; };
 		DD0530612427AB7B0091B3C6 /* ja */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = ja; path = ja.lproj/Main.storyboard; sourceTree = "<group>"; };
 		DD0530622427AB7B0091B3C6 /* ja */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = ja; path = ja.lproj/Main.storyboard; sourceTree = "<group>"; };
-		DD0AE2E122DAB13100B68F05 /* JoyMapperSilicon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JoyMapperSilicon.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD0AE2E122DAB13100B68F05 /* JoyMapperPlus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JoyMapperPlus.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD0AE2E422DAB13100B68F05 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DD0AE2F022DAB13200B68F05 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DD0AE2F122DAB13200B68F05 /* JoyKeyMapper.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = JoyKeyMapper.entitlements; sourceTree = "<group>"; };
 		DD8744722412941B00B3AB11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		DD87447A241495A700B3AB11 /* JoyMapperSiliconLauncher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JoyMapperSiliconLauncher.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD87447A241495A700B3AB11 /* JoyMapperPlusLauncher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JoyMapperPlusLauncher.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD87447C241495A700B3AB11 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DD874480241495A900B3AB11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DD874488241495A900B3AB11 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -238,8 +238,8 @@
 		DD0AE2E222DAB13100B68F05 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				DD0AE2E122DAB13100B68F05 /* JoyMapperSilicon.app */,
-				DD87447A241495A700B3AB11 /* JoyMapperSiliconLauncher.app */,
+				DD0AE2E122DAB13100B68F05 /* JoyMapperPlus.app */,
+				DD87447A241495A700B3AB11 /* JoyMapperPlusLauncher.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -291,8 +291,8 @@
 			dependencies = (
 			);
 			name = JoyMapperSilicon;
-			productName = JoyKeyMapper;
-			productReference = DD0AE2E122DAB13100B68F05 /* JoyMapperSilicon.app */;
+			productName = JoyMapperPlus;
+			productReference = DD0AE2E122DAB13100B68F05 /* JoyMapperPlus.app */;
 			productType = "com.apple.product-type.application";
 		};
 		DD874479241495A700B3AB11 /* JoyMapperSiliconLauncher */ = {
@@ -308,8 +308,8 @@
 			dependencies = (
 			);
 			name = JoyMapperSiliconLauncher;
-			productName = JoyKeyMapperLauncher;
-			productReference = DD87447A241495A700B3AB11 /* JoyMapperSiliconLauncher.app */;
+			productName = JoyMapperPlusLauncher;
+			productReference = DD87447A241495A700B3AB11 /* JoyMapperPlusLauncher.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -644,8 +644,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = cn.qibinc.JoyMapperSilicon;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = cn.coderzc.JoyMapperPlus;
+				PRODUCT_NAME = JoyMapperPlus;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = NO;
 				SWIFT_VERSION = 5.0;
@@ -670,8 +670,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = cn.qibinc.JoyMapperSilicon;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = cn.coderzc.JoyMapperPlus;
+				PRODUCT_NAME = JoyMapperPlus;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = NO;
 				SWIFT_VERSION = 5.0;
@@ -696,8 +696,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				PRODUCT_BUNDLE_IDENTIFIER = cn.qibinc.JoyMapperSiliconLauncher;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = cn.coderzc.JoyMapperPlusLauncher;
+				PRODUCT_NAME = JoyMapperPlusLauncher;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;
@@ -722,8 +722,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				PRODUCT_BUNDLE_IDENTIFIER = cn.qibinc.JoyMapperSiliconLauncher;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = cn.coderzc.JoyMapperPlusLauncher;
+				PRODUCT_NAME = JoyMapperPlusLauncher;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 5.0;

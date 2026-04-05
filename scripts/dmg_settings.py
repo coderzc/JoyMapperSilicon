@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import biplist
 import os.path
 
-app = defines.get('app', './dmg/JoyKeyMapper.app')
+app = defines.get('app', './dmg/JoyMapperPlus.app')
 appname = os.path.basename(app)
 
 # Basics
@@ -42,4 +42,3 @@ scrolll_position = (0, 0)
 label_pos = 'bottom'
 text_size = 12
 icon_size = 164
-

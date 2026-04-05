@@ -1,29 +1,31 @@
-# JoyMapperSilicon
-Nintendo Joy-Con / Pro Controller Mapper for Apple Silicon (also works on Intel-based macOS Big Sur). It maps gamepad buttons to keyboard / mouse events smoothly and works for games and platforms which haven't yet supported gamepad on M1 Macs, e.g., Witcher 3, CrossOver.
+# JoyMapperPlus
+Nintendo Joy-Con / Pro Controller mapper for Apple Silicon Macs. It maps gamepad buttons to keyboard and mouse events smoothly, and this fork focuses on making reconnects and day-to-day controller usage more reliable.
 
 ## Demo on YouTube
 
 [Apple Silicon Mac | CrossOver | Playing Witcher 3 with GAMEPAD (Nintendo Joy-Con / Pro Controller)
 ](https://youtu.be/1jpcuREivmk)
 
-## Advantages v.s. alternatives
+## Advantages over alternatives
 
-|                                                          | Big Sur | Apple silicon native | Mouse working in games | 360° mouse move & acceleration (smooth view angle rotation) | Joystick orientation at 45°s (smooth character moving) | Both Joy Cons as a pair |
-| :------------------------------------------------------: | :-----: | :------------------: | :--------------------: | :---------------------------------------------------------: | :----------------------------------------------------: | :---------------------: |
-|     [Enjoyable](https://yukkurigames.com/enjoyable/)     |    ✅    |          ❌           |           ✅            |                              ❌                              |                           ✅                            |            ❌            |
-|       [Enjoy2](https://github.com/fyhuang/enjoy2/)       |    ❌    |          ❌           |           -            |                              -                              |                           -                            |            -            |
-| [JoyKeyMapper](https://github.com/magicien/JoyKeyMapper) |    ✅    |          ❌           |           ❌            |                              ✅                              |                           ❌                            |            ✅            |
-|                 JoyMapperSilicon (this app)                  |    ✅    |          ✅           |           ✅            |                              ✅                              |                           ✅                            |            ✅            |
+JoyMapperPlus keeps the original Apple Silicon gamepad mapping strengths, while improving the parts that matter during real use: reconnect behavior, mapping recovery after reconnect, safer rescanning, and modifier-only mappings such as Control-only.
+
+|                                                          | Apple silicon native | Mouse working in games | 360° mouse move & acceleration | Both Joy Cons as a pair | Reliable reconnects | Mappings stay active after reconnect | Modifier-only mappings |
+| :------------------------------------------------------: | :------------------: | :--------------------: | :----------------------------: | :---------------------: | :-----------------: | :----------------------------------: | :--------------------: |
+|     [Enjoyable](https://yukkurigames.com/enjoyable/)     |          ❌           |           ✅            |               ❌                |            ❌            |          -          |                  -                   |           ❌           |
+|       [Enjoy2](https://github.com/fyhuang/enjoy2/)       |          ❌           |           -            |               -                |            -            |          -          |                  -                   |           -            |
+| [JoyKeyMapper](https://github.com/magicien/JoyKeyMapper) |          ❌           |           ❌            |               ✅                |            ✅            |          ❌         |                  ❌                  |           ❌           |
+|                JoyMapperPlus (this build)                |          ✅           |           ✅            |               ✅                |            ✅            |          ✅         |                  ✅                  |           ✅           |
 
 ## Installation
 
-1. Download the zip file (JoyMapperSilicon.app.zip) from [Releases](https://github.com/qibinc/JoyMapperSilicon/releases/)
+1. Download the latest build from [Releases](https://github.com/coderzc/JoyMapperSilicon/releases/)
 
-2. Copy JoyMapperSilicon.app to `Applications/` folder.
+2. Copy `JoyMapperPlus.app` to the `Applications/` folder.
 
 ## Usage
 
-![screenshot](https://github.com/qibinc/JoyMapperSilicon/blob/master/resources/screenshot/screenshot_1.png)
+![screenshot](https://github.com/coderzc/JoyMapperSilicon/blob/master/resources/screenshot/screenshot_1.png)
 
 See [magicien's How to Use](https://github.com/magicien/JoyKeyMapper#how-to-use).
 
