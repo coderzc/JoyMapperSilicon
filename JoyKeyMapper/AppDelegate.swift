@@ -39,7 +39,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
         icon?.size = NSSize(width: 24, height: 24)
         self.statusItem.button?.image = icon
         self.statusItem.menu = self.menu
-        self.insertTestNotificationMenuItem()
 
         self.configureManagerHandlers()
         
@@ -81,10 +80,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
         self.windowController?.window?.delegate = self
     }
 
-    @IBAction func testNotification(_ sender: Any) {
-        AppNotifications.testNotification()
-    }
-    
     @IBAction func quit(_ sender: Any) {
         NSApplication.shared.terminate(self)
     }
@@ -163,18 +158,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
         if (!succeeded) {
             
         }
-    }
-
-    private func insertTestNotificationMenuItem() {
-        guard let menu = self.menu else { return }
-        guard menu.items.contains(where: { $0.action == #selector(self.testNotification(_:)) }) == false else { return }
-
-        let title = NSLocalizedString("Test Notification", comment: "Test Notification")
-        let item = NSMenuItem(title: title, action: #selector(self.testNotification(_:)), keyEquivalent: "")
-        item.target = self
-
-        let settingsIndex = menu.items.firstIndex(where: { $0.action == #selector(self.openSettings(_:)) }) ?? (menu.items.count - 1)
-        menu.insertItem(item, at: settingsIndex + 1)
     }
 
     private func configureManagerHandlers() {
