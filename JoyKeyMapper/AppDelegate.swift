@@ -15,14 +15,17 @@ let helperAppID: CFString = "cn.qibinc.JoyMapperSiliconLauncher" as CFString
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNotificationCenterDelegate {
+    private static let autoRescanInterval: TimeInterval = 1.5
+
     @IBOutlet weak var menu: NSMenu?
     @IBOutlet weak var controllersMenu: NSMenuItem?
     let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     var windowController: NSWindowController?
     
-    let manager: JoyConManager = JoyConManager()
+    var manager: JoyConManager = JoyConManager()
     var dataManager: DataManager?
     var controllers: [GameController] = []
+    private var autoRescanTimer: Timer?
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
@@ -36,14 +39,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
         icon?.size = NSSize(width: 24, height: 24)
         self.statusItem.button?.image = icon
         self.statusItem.menu = self.menu
+        self.insertTestNotificationMenuItem()
 
-        // Set controller handlers
-        self.manager.connectHandler = { [weak self] controller in
-            self?.connectController(controller)
-        }
-        self.manager.disconnectHandler = { [weak self] controller in
-            self?.disconnectController(controller)
-        }
+        self.configureManagerHandlers()
         
         self.dataManager = DataManager() { [weak self] manager in
             guard let strongSelf = self else { return }
@@ -54,6 +52,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
                 strongSelf.controllers.append(gameController)
             }
             _ = strongSelf.manager.runAsync()
+            strongSelf.startAutoRescan(reason: "startup")
             
             NSWorkspace.shared.notificationCenter.addObserver(strongSelf, selector: #selector(strongSelf.didActivateApp), name: NSWorkspace.didActivateApplicationNotification, object: nil)
             
@@ -81,6 +80,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
         self.windowController?.window?.orderFrontRegardless()
         self.windowController?.window?.delegate = self
     }
+
+    @IBAction func testNotification(_ sender: Any) {
+        AppNotifications.testNotification()
+    }
     
     @IBAction func quit(_ sender: Any) {
         NSApplication.shared.terminate(self)
@@ -88,9 +91,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
 
     func updateControllersMenu() {
         self.controllersMenu?.submenu?.removeAllItems()
+        var hasConnectedControllers = false
+
+        let rescanTitle = NSLocalizedString("Rescan Controllers", comment: "Rescan Controllers")
+        let rescanItem = NSMenuItem()
+        rescanItem.title = rescanTitle
+        rescanItem.action = #selector(self.rescanControllers(_:))
+        rescanItem.target = self
+        self.controllersMenu?.submenu?.addItem(rescanItem)
+        self.controllersMenu?.submenu?.addItem(NSMenuItem.separator())
 
         self.controllers.forEach { controller in
             guard controller.controller?.isConnected ?? false else { return }
+            hasConnectedControllers = true
             let item = NSMenuItem()
 
             item.title = ""
@@ -134,7 +147,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
             self.controllersMenu?.submenu?.addItem(item)
         }
         
-        if let itemCount = self.controllersMenu?.submenu?.items.count, itemCount <= 0 {
+        if !hasConnectedControllers {
             let item = NSMenuItem()
             let noControllers = NSLocalizedString("No controllers connected", comment: "No controllers connected")
             item.title = "(\(noControllers))"
@@ -150,6 +163,87 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
         if (!succeeded) {
             
         }
+    }
+
+    private func insertTestNotificationMenuItem() {
+        guard let menu = self.menu else { return }
+        guard menu.items.contains(where: { $0.action == #selector(self.testNotification(_:)) }) == false else { return }
+
+        let title = NSLocalizedString("Test Notification", comment: "Test Notification")
+        let item = NSMenuItem(title: title, action: #selector(self.testNotification(_:)), keyEquivalent: "")
+        item.target = self
+
+        let settingsIndex = menu.items.firstIndex(where: { $0.action == #selector(self.openSettings(_:)) }) ?? (menu.items.count - 1)
+        menu.insertItem(item, at: settingsIndex + 1)
+    }
+
+    private func configureManagerHandlers() {
+        self.manager.connectHandler = { [weak self] controller in
+            DispatchQueue.main.async {
+                self?.connectController(controller)
+            }
+        }
+        self.manager.disconnectHandler = { [weak self] controller in
+            DispatchQueue.main.async {
+                self?.disconnectController(controller)
+            }
+        }
+    }
+
+    private func syncControllerAppContext(_ gameController: GameController) {
+        guard let bundleID = NSWorkspace.shared.frontmostApplication?.bundleIdentifier else { return }
+        resetMetaKeyState()
+        gameController.switchApp(bundleID: bundleID)
+    }
+
+    private func resetControllerConnections() {
+        self.controllers.forEach { controller in
+            controller.controller = nil
+            controller.updateControllerIcon()
+        }
+        self.updateControllersMenu()
+    }
+
+    private func hasConnectedControllers() -> Bool {
+        return self.controllers.contains { $0.controller?.isConnected ?? false }
+    }
+
+    private func cancelAutoRescan() {
+        self.autoRescanTimer?.invalidate()
+        self.autoRescanTimer = nil
+    }
+
+    private func startAutoRescan(reason: String) {
+        guard !self.hasConnectedControllers() else {
+            self.cancelAutoRescan()
+            return
+        }
+
+        guard self.autoRescanTimer == nil else { return }
+        NSLog("[JoyMapperSilicon] Starting auto rescan (%@)", reason)
+
+        let timer = Timer(timeInterval: AppDelegate.autoRescanInterval, repeats: true) { [weak self] timer in
+            guard let self = self else {
+                timer.invalidate()
+                return
+            }
+
+            if self.hasConnectedControllers() {
+                self.cancelAutoRescan()
+                return
+            }
+
+            NSLog("[JoyMapperSilicon] Auto rescan tick")
+            self.manager.rescanConnectedDevices()
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        self.autoRescanTimer = timer
+    }
+
+    @objc func rescanControllers(_ sender: Any?) {
+        NSLog("[JoyMapperSilicon] Rescanning controllers")
+        self.startAutoRescan(reason: "manual")
+        self.manager.rescanConnectedDevices()
     }
     
     // MARK: - NSWindowDelegate
@@ -177,6 +271,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
     // MARK: - Controller event handlers
 
     func applicationWillTerminate(_ aNotification: Notification) {
+        self.cancelAutoRescan()
         self.controllers.forEach { controller in
             controller.controller?.setHCIState(state: .disconnect)
         }
@@ -188,12 +283,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
         }) {
             gameController.controller = controller
             gameController.startTimer()
+            self.syncControllerAppContext(gameController)
             NotificationCenter.default.post(name: .controllerConnected, object: gameController)
 
             AppNotifications.notifyControllerConnected(gameController)
         } else {
             self.addController(controller)
         }
+        self.cancelAutoRescan()
         self.updateControllersMenu()
     }
 
@@ -215,6 +312,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
             
             AppNotifications.notifyControllerDisconnected(gameController)
         }
+        if !self.hasConnectedControllers() {
+            self.startAutoRescan(reason: "disconnect")
+        }
         self.updateControllersMenu()
     }
 
@@ -224,6 +324,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, UNUserNoti
         let gameController = GameController(data: controllerData)
         gameController.controller = controller
         gameController.startTimer()
+        self.syncControllerAppContext(gameController)
         self.controllers.append(gameController)
         
         NotificationCenter.default.post(name: .controllerAdded, object: gameController)

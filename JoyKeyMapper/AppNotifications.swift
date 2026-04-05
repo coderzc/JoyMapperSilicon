@@ -10,6 +10,15 @@ import AppKit
 import UserNotifications
 
 class AppNotifications {
+    static func testNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = NSLocalizedString("Test notification", comment: "Title of a test notification")
+        content.body = NSLocalizedString("If you can see this, notification delivery is working.", comment: "Body of a test notification")
+        content.categoryIdentifier = "info"
+        let request = UNNotificationRequest(identifier: "testNotification", content: content, trigger: nil)
+        self.notify(request: request)
+    }
+
     static func createControllerIconAttachment(for controller: GameController) -> UNNotificationAttachment? {
         guard let cgImage = controller.icon?.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
         guard let pngData = NSBitmapImageRep(cgImage: cgImage).representation(using: .png, properties: [:]) else { return nil }

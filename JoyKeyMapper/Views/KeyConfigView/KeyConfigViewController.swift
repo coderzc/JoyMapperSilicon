@@ -46,9 +46,13 @@ class KeyConfigViewController: NSViewController, NSComboBoxDelegate, KeyConfigCo
         self.controlKey.state = modifiers.contains(.control) ? .on : .off
         self.commandKey.state = modifiers.contains(.command) ? .on : .off
         
-        if keyMap.keyCode >= 0 {
+        if keyMap.keyCode >= 0 || (keyMap.mouseButton < 0 && !modifiers.isEmpty) {
             self.keyRadioButton.state = .on
-            self.keyAction.stringValue = getKeyName(keyCode: UInt16(keyMap.keyCode))
+            if keyMap.keyCode >= 0 {
+                self.keyAction.stringValue = getKeyName(keyCode: UInt16(keyMap.keyCode))
+            } else {
+                self.keyAction.stringValue = ""
+            }
         } else {
             self.mouseRadioButton.state = .on
             self.mouseAction.selectItem(withTag: Int(keyMap.mouseButton))

@@ -146,22 +146,53 @@ class ViewController: NSViewController {
     }
     
     // MARK: - Controllers
+
+    private func syncControllerSelection() {
+        guard let collectionView = self.controllerCollectionView else { return }
+        let controllers = self.appDelegate?.controllers ?? []
+
+        if controllers.isEmpty {
+            self.selectedController = nil
+            collectionView.deselectAll(nil)
+            return
+        }
+
+        let selectedIndex: Int?
+        if let selectedController = self.selectedController {
+            selectedIndex = controllers.firstIndex(where: { $0 === selectedController })
+        } else {
+            selectedIndex = 0
+        }
+
+        guard let index = selectedIndex, controllers.indices.contains(index) else {
+            self.selectedController = nil
+            collectionView.deselectAll(nil)
+            return
+        }
+
+        let indexPath = IndexPath(item: index, section: 0)
+        collectionView.selectItems(at: [indexPath], scrollPosition: [])
+        self.selectedController = controllers[index]
+    }
     
     @objc func controllerAdded() {
         DispatchQueue.main.async { [weak self] in
             self?.controllerCollectionView.reloadData()
+            self?.syncControllerSelection()
         }
     }
     
     @objc func controllerConnected() {
         DispatchQueue.main.async { [weak self] in
             self?.controllerCollectionView.reloadData()
+            self?.syncControllerSelection()
         }
     }
     
     @objc func controllerDisconnected() {
         DispatchQueue.main.async { [weak self] in
             self?.controllerCollectionView.reloadData()
+            self?.syncControllerSelection()
         }
     }
     
@@ -179,14 +210,14 @@ class ViewController: NSViewController {
                 }
             }
             self?.controllerCollectionView.reloadData()
+            self?.syncControllerSelection()
         }
     }
     
     @objc func controllerIconChanged(_ notification: NSNotification) {
-        guard let gameController = notification.object as? GameController else { return }
-        
         DispatchQueue.main.async { [weak self] in
             self?.controllerCollectionView.reloadData()
+            self?.syncControllerSelection()
         }
     }
     

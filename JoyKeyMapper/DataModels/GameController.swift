@@ -196,6 +196,11 @@ class GameController {
     func buttonPressHandler(config: KeyMap) {
         DispatchQueue.main.async {
             let source = CGEventSource(stateID: .hidSystemState)
+            let hasMetaOnlyAction = config.keyCode < 0 && config.mouseButton < 0 && config.modifiers != 0
+
+            if hasMetaOnlyAction {
+                metaKeyEvent(config: config, keyDown: true)
+            }
 
             if config.keyCode >= 0 {
                 metaKeyEvent(config: config, keyDown: true)
@@ -254,6 +259,7 @@ class GameController {
     func buttonReleaseHandler(config: KeyMap) {
         DispatchQueue.main.async {
             let source = CGEventSource(stateID: .hidSystemState)
+            let hasMetaOnlyAction = config.keyCode < 0 && config.mouseButton < 0 && config.modifiers != 0
             
             if config.keyCode >= 0 {
                 if let systemKey = systemDefinedKey[Int(config.keyCode)] {
@@ -297,6 +303,10 @@ class GameController {
                     self.isCenterDragging = false
                 }
                 event?.post(tap: .cghidEventTap)
+            }
+
+            if hasMetaOnlyAction {
+                metaKeyEvent(config: config, keyDown: false)
             }
         }
     }

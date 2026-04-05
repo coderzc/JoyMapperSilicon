@@ -5,13 +5,17 @@
 
 GIT=`sh /etc/profile; which git`
 
-LATEST_TAG=`git describe --tags --abbrev=0 --match "v*.*.*"`
+LATEST_TAG=`"${GIT}" describe --tags --abbrev=0 --match "v*.*.*" 2>/dev/null`
 if [ "${LATEST_TAG}" == "" ]; then
-  echo "error: Version tag not found"
-  exit 1
+  LATEST_TAG=`"${GIT}" describe --tags --abbrev=0 --match "v*" 2>/dev/null`
 fi
 
-VERSION=`echo "${LATEST_TAG}" | cut -c 2-`
+if [ "${LATEST_TAG}" == "" ]; then
+  VERSION="${MARKETING_VERSION:-1.0}"
+  echo "warning: Version tag not found, fallback to ${VERSION}"
+else
+  VERSION=`echo "${LATEST_TAG}" | cut -c 2-`
+fi
 
 NUM_COMMITS=`"${GIT}" rev-list HEAD --count`
 
