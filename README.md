@@ -1,7 +1,7 @@
 # JoyMapperPlus
 Nintendo Joy-Con / Pro Controller mapper for Apple Silicon Macs. It maps gamepad buttons to keyboard and mouse events smoothly, and this fork focuses on making reconnects and day-to-day controller usage more reliable.
 
-## Demo on YouTube
+## Demo
 
 [Switch手柄写代码，躺着 Vibe Coding](https://www.bilibili.com/video/BV1sMS9BnE2w)
 
