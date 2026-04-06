@@ -14,6 +14,7 @@ JoyMapperPlus keeps the original Apple Silicon gamepad mapping strengths, while 
 |     [Enjoyable](https://yukkurigames.com/enjoyable/)     |          ❌           |           ✅            |               ❌                |            ❌            |          -          |                  -                   |           ❌           |
 |       [Enjoy2](https://github.com/fyhuang/enjoy2/)       |          ❌           |           -            |               -                |            -            |          -          |                  -                   |           -            |
 | [JoyKeyMapper](https://github.com/magicien/JoyKeyMapper) |          ❌           |           ❌            |               ✅                |            ✅            |          ❌         |                  ❌                  |           ❌           |
+| [JoyMapperSilicon (original)](https://github.com/qibinc/JoyMapperSilicon) |          ✅           |           ✅            |               ✅                |            ✅            |          ❌         |                  ❌                  |           ❌           |
 |                JoyMapperPlus (this build)                |          ✅           |           ✅            |               ✅                |            ✅            |          ✅         |                  ✅                  |           ✅           |
 
 ## Installation
