@@ -59,9 +59,14 @@ class ControllerViewItem: NSCollectionViewItem {
         }
         menu.addItem(disconnectMenu)
         
-        /*
         // Separator
         menu.addItem(NSMenuItem.separator())
+
+        // Copy menu
+        let copyTitle = NSLocalizedString("Copy key mappings to...", comment: "Copy key mappings to...")
+        let copyMenu = NSMenuItem(title: copyTitle, action: Selector(("copyKeyMappings")), keyEquivalent: "")
+        copyMenu.target = self
+        menu.addItem(copyMenu)
         
         // Import menu
         let importTitle = NSLocalizedString("Import key mappings", comment: "Import key mappings")
@@ -74,7 +79,6 @@ class ControllerViewItem: NSCollectionViewItem {
         let exportMenu = NSMenuItem(title: exportTitle, action: Selector(("exportKeyMappings")), keyEquivalent: "")
         exportMenu.target = self
         menu.addItem(exportMenu)
-        */
         
         // Separator
         menu.addItem(NSMenuItem.separator())
@@ -97,13 +101,32 @@ class ControllerViewItem: NSCollectionViewItem {
     @objc func disconnect() {
         self.controller?.disconnect()
     }
+
+    private func parentViewController() -> ViewController? {
+        var responder: NSResponder? = self
+        while let current = responder {
+            if let viewController = current as? ViewController {
+                return viewController
+            }
+            responder = current.nextResponder
+        }
+
+        return nil
+    }
+
+    @objc func copyKeyMappings() {
+        guard let controller = self.controller else { return }
+        self.parentViewController()?.copyKeyMappings(from: controller)
+    }
     
     @objc func importKeyMappings() {
-        
+        guard let controller = self.controller else { return }
+        self.parentViewController()?.importKeyMappings(for: controller)
     }
     
     @objc func exportKeyMappings() {
-        
+        guard let controller = self.controller else { return }
+        self.parentViewController()?.exportKeyMappings(for: controller)
     }
     
     @objc func remove() {

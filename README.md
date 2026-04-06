@@ -29,6 +29,14 @@ JoyMapperPlus keeps the original Apple Silicon gamepad mapping strengths, while 
 
 See [magicien's How to Use](https://github.com/magicien/JoyKeyMapper#how-to-use).
 
+## New in JoyMapperPlus
+
+- Copy mappings from one controller to another from the controller context menu with `Copy key mappings to...`.
+- Export the selected controller's mappings as a portable `.jmpmap` file.
+- Import a `.jmpmap`, `.jkmap`, or `.json` mapping file into the selected controller.
+
+This makes it much easier to keep multiple Joy-Cons in sync or back up and restore your preferred layout.
+
 ## Support the work
 
 [![Paypal Donate](https://img.shields.io/badge/paypal-donate-orange)](https://paypal.me/joysilicon) You can buy me a cup of bubble tea if you like it.

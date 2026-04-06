@@ -23,6 +23,40 @@ enum StickDirection: String {
     case Down = "Down"
 }
 
+private struct ControllerConfigSnapshot: Codable {
+    let version: Int
+    let sourceType: String?
+    let defaultConfig: KeyConfigSnapshot
+    let appConfigs: [AppConfigSnapshot]
+}
+
+private struct AppConfigSnapshot: Codable {
+    let bundleID: String?
+    let displayName: String?
+    let icon: Data?
+    let config: KeyConfigSnapshot
+}
+
+private struct KeyConfigSnapshot: Codable {
+    let keyMaps: [KeyMapSnapshot]
+    let leftStick: StickConfigSnapshot?
+    let rightStick: StickConfigSnapshot?
+}
+
+private struct StickConfigSnapshot: Codable {
+    let speed: Float
+    let type: String?
+    let keyMaps: [KeyMapSnapshot]
+}
+
+private struct KeyMapSnapshot: Codable {
+    let button: String?
+    let isEnabled: Bool
+    let keyCode: Int16
+    let modifiers: Int32
+    let mouseButton: Int16
+}
+
 class DataManager: NSObject {
     let container: NSPersistentContainer
 
@@ -147,6 +181,26 @@ class DataManager: NSObject {
         return nil
     }
 
+    func exportControllerConfig(_ controller: ControllerData, to url: URL) throws {
+        let snapshot = self.makeSnapshot(from: controller)
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        let data = try encoder.encode(snapshot)
+        try data.write(to: url, options: .atomic)
+    }
+
+    func importControllerConfig(from url: URL, into controller: ControllerData) throws {
+        let data = try Data(contentsOf: url)
+        let decoder = JSONDecoder()
+        let snapshot = try decoder.decode(ControllerConfigSnapshot.self, from: data)
+        self.apply(snapshot: snapshot, to: controller)
+    }
+
+    func copyControllerConfig(from source: ControllerData, to destination: ControllerData) {
+        let snapshot = self.makeSnapshot(from: source)
+        self.apply(snapshot: snapshot, to: destination)
+    }
+
     // MARK: - ControllerData
     
     func createControllerData(type: JoyCon.ControllerType) -> ControllerData {
@@ -252,5 +306,167 @@ class DataManager: NSObject {
     
     func delete(_ object: NSManagedObject) {
         self.container.viewContext.delete(object)
+    }
+
+    private func makeSnapshot(from controller: ControllerData) -> ControllerConfigSnapshot {
+        let appConfigs = (controller.appConfigs?.array as? [AppConfig] ?? []).map {
+            self.makeSnapshot(from: $0)
+        }
+
+        return ControllerConfigSnapshot(
+            version: 1,
+            sourceType: controller.type,
+            defaultConfig: self.makeSnapshot(from: controller.defaultConfig),
+            appConfigs: appConfigs
+        )
+    }
+
+    private func makeSnapshot(from appConfig: AppConfig) -> AppConfigSnapshot {
+        return AppConfigSnapshot(
+            bundleID: appConfig.app?.bundleID,
+            displayName: appConfig.app?.displayName,
+            icon: appConfig.app?.icon,
+            config: self.makeSnapshot(from: appConfig.config)
+        )
+    }
+
+    private func makeSnapshot(from keyConfig: KeyConfig?) -> KeyConfigSnapshot {
+        return KeyConfigSnapshot(
+            keyMaps: self.makeSnapshots(from: keyConfig?.keyMaps),
+            leftStick: self.makeSnapshot(from: keyConfig?.leftStick),
+            rightStick: self.makeSnapshot(from: keyConfig?.rightStick)
+        )
+    }
+
+    private func makeSnapshot(from stickConfig: StickConfig?) -> StickConfigSnapshot? {
+        guard let stickConfig = stickConfig else { return nil }
+
+        return StickConfigSnapshot(
+            speed: stickConfig.speed,
+            type: stickConfig.type,
+            keyMaps: self.makeSnapshots(from: stickConfig.keyMaps)
+        )
+    }
+
+    private func makeSnapshots(from keyMaps: NSSet?) -> [KeyMapSnapshot] {
+        return (keyMaps?.allObjects as? [KeyMap] ?? [])
+            .sorted { ($0.button ?? "") < ($1.button ?? "") }
+            .map { keyMap in
+                KeyMapSnapshot(
+                    button: keyMap.button,
+                    isEnabled: keyMap.isEnabled,
+                    keyCode: keyMap.keyCode,
+                    modifiers: keyMap.modifiers,
+                    mouseButton: keyMap.mouseButton
+                )
+            }
+    }
+
+    private func apply(snapshot: ControllerConfigSnapshot, to controller: ControllerData) {
+        if let defaultConfig = controller.defaultConfig {
+            controller.defaultConfig = nil
+            self.deleteKeyConfig(defaultConfig)
+        }
+
+        let existingApps = controller.appConfigs?.array as? [AppConfig] ?? []
+        existingApps.forEach { appConfig in
+            controller.removeFromAppConfigs(appConfig)
+            self.deleteAppConfig(appConfig)
+        }
+
+        controller.defaultConfig = self.createKeyConfig(from: snapshot.defaultConfig)
+        snapshot.appConfigs
+            .map { self.createAppConfig(from: $0) }
+            .forEach { controller.addToAppConfigs($0) }
+    }
+
+    private func createAppConfig(from snapshot: AppConfigSnapshot) -> AppConfig {
+        let appConfig = AppConfig(context: self.container.viewContext)
+        let appData = AppData(context: self.container.viewContext)
+
+        appData.bundleID = snapshot.bundleID
+        appData.displayName = snapshot.displayName
+        appData.icon = snapshot.icon
+
+        appConfig.app = appData
+        appConfig.config = self.createKeyConfig(from: snapshot.config)
+
+        return appConfig
+    }
+
+    private func createKeyConfig(from snapshot: KeyConfigSnapshot) -> KeyConfig {
+        let keyConfig = KeyConfig(context: self.container.viewContext)
+
+        snapshot.keyMaps
+            .map { self.createKeyMap(from: $0) }
+            .forEach { keyConfig.addToKeyMaps($0) }
+
+        if let leftStick = snapshot.leftStick {
+            keyConfig.leftStick = self.createStickConfig(from: leftStick)
+        }
+        if let rightStick = snapshot.rightStick {
+            keyConfig.rightStick = self.createStickConfig(from: rightStick)
+        }
+
+        return keyConfig
+    }
+
+    private func createStickConfig(from snapshot: StickConfigSnapshot) -> StickConfig {
+        let stickConfig = StickConfig(context: self.container.viewContext)
+        stickConfig.speed = snapshot.speed
+        stickConfig.type = snapshot.type
+
+        snapshot.keyMaps
+            .map { self.createKeyMap(from: $0) }
+            .forEach { stickConfig.addToKeyMaps($0) }
+
+        return stickConfig
+    }
+
+    private func createKeyMap(from snapshot: KeyMapSnapshot) -> KeyMap {
+        let keyMap = KeyMap(context: self.container.viewContext)
+        keyMap.button = snapshot.button
+        keyMap.isEnabled = snapshot.isEnabled
+        keyMap.keyCode = snapshot.keyCode
+        keyMap.modifiers = snapshot.modifiers
+        keyMap.mouseButton = snapshot.mouseButton
+
+        return keyMap
+    }
+
+    private func deleteAppConfig(_ appConfig: AppConfig) {
+        if let config = appConfig.config {
+            appConfig.config = nil
+            self.deleteKeyConfig(config)
+        }
+        if let app = appConfig.app {
+            appConfig.app = nil
+            self.delete(app)
+        }
+        self.delete(appConfig)
+    }
+
+    private func deleteKeyConfig(_ keyConfig: KeyConfig) {
+        let keyMaps = keyConfig.keyMaps?.allObjects as? [KeyMap] ?? []
+        keyMaps.forEach { keyConfig.removeFromKeyMaps($0) }
+        keyMaps.forEach { self.delete($0) }
+
+        if let leftStick = keyConfig.leftStick {
+            keyConfig.leftStick = nil
+            self.deleteStickConfig(leftStick)
+        }
+        if let rightStick = keyConfig.rightStick {
+            keyConfig.rightStick = nil
+            self.deleteStickConfig(rightStick)
+        }
+
+        self.delete(keyConfig)
+    }
+
+    private func deleteStickConfig(_ stickConfig: StickConfig) {
+        let keyMaps = stickConfig.keyMaps?.allObjects as? [KeyMap] ?? []
+        keyMaps.forEach { stickConfig.removeFromKeyMaps($0) }
+        keyMaps.forEach { self.delete($0) }
+        self.delete(stickConfig)
     }
 }

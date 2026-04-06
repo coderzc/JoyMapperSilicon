@@ -220,28 +220,126 @@ class ViewController: NSViewController {
             self?.syncControllerSelection()
         }
     }
+
+    private func refreshControllerConfig(_ controller: GameController) {
+        if let bundleID = NSWorkspace.shared.frontmostApplication?.bundleIdentifier {
+            controller.switchApp(bundleID: bundleID)
+        } else {
+            controller.updateKeyMap()
+        }
+
+        if self.selectedController === controller {
+            self.appTableView.reloadData()
+            self.configTableView.reloadData()
+        }
+    }
+
+    private func controllerDisplayName(_ controller: GameController) -> String {
+        let typeName = NSLocalizedString(controller.type.rawValue, comment: "Controller type")
+        guard let serialID = controller.data.serialID, !serialID.isEmpty else {
+            return typeName
+        }
+
+        let suffixLength = min(4, serialID.count)
+        let suffix = String(serialID.suffix(suffixLength))
+        return "\(typeName) (\(suffix))"
+    }
+
+    private func showOperationError(_ error: Error) {
+        NSApplication.shared.presentError(error as NSError)
+    }
+
+    func copyKeyMappings(from sourceController: GameController) {
+        guard let dataManager = self.appDelegate?.dataManager else { return }
+        let targetControllers = (self.appDelegate?.controllers ?? []).filter { $0 !== sourceController }
+
+        guard !targetControllers.isEmpty else {
+            let alert = NSAlert()
+            alert.messageText = NSLocalizedString("No other controllers available", comment: "No copy target")
+            alert.informativeText = NSLocalizedString("Connect or add another controller first, then try copying the settings again.", comment: "No copy target info")
+            alert.addButton(withTitle: NSLocalizedString("OK", comment: "OK"))
+            alert.runModal()
+            return
+        }
+
+        let popup = NSPopUpButton(frame: NSRect(x: 0, y: 0, width: 280, height: 26), pullsDown: false)
+        targetControllers.forEach { controller in
+            popup.addItem(withTitle: self.controllerDisplayName(controller))
+            popup.lastItem?.representedObject = controller
+        }
+
+        let alert = NSAlert()
+        alert.messageText = NSLocalizedString("Copy controller settings", comment: "Copy controller settings")
+        alert.informativeText = NSLocalizedString("The target controller's current mappings will be replaced.", comment: "Copy controller settings info")
+        alert.accessoryView = popup
+        alert.addButton(withTitle: NSLocalizedString("Cancel", comment: "Cancel"))
+        alert.addButton(withTitle: NSLocalizedString("Copy", comment: "Copy"))
+
+        guard alert.runModal() == .alertSecondButtonReturn else { return }
+        guard let targetController = popup.selectedItem?.representedObject as? GameController else { return }
+
+        dataManager.copyControllerConfig(from: sourceController.data, to: targetController.data)
+        _ = dataManager.save()
+
+        self.refreshControllerConfig(sourceController)
+        self.refreshControllerConfig(targetController)
+    }
     
     // MARK: - Import
     
     @IBAction func importKeyMappings(_ sender: NSButton) {
+        guard let controller = self.selectedController else { return }
+        self.importKeyMappings(for: controller)
+    }
+
+    func importKeyMappings(for controller: GameController) {
+        guard let dataManager = self.appDelegate?.dataManager else { return }
+
+        let panel = NSOpenPanel()
+        panel.message = NSLocalizedString("Choose a key mapping file", comment: "Choose a key mapping file")
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.allowedFileTypes = ["jmpmap", "jkmap", "json"]
+        panel.begin { [weak self] response in
+            guard response == .OK else { return }
+            guard let url = panel.url else { return }
+
+            do {
+                try dataManager.importControllerConfig(from: url, into: controller.data)
+                _ = dataManager.save()
+                self?.refreshControllerConfig(controller)
+            } catch {
+                self?.showOperationError(error)
+            }
+        }
     }
     
     // MARK: - Export
     
     @IBAction func exportKeyMappngs(_ sender: NSButton) {
-        return
-        /*
+        guard let controller = self.selectedController else { return }
+        self.exportKeyMappings(for: controller)
+    }
+
+    func exportKeyMappings(for controller: GameController) {
         guard let dataManager = self.appDelegate?.dataManager else { return }
 
         let savePanel = NSSavePanel()
         savePanel.message = NSLocalizedString("Save key mapping data", comment: "Save key mapping data")
-        savePanel.allowedFileTypes = ["jkmap"]
-        
-        savePanel.begin { response in
+        savePanel.allowedFileTypes = ["jmpmap"]
+        savePanel.nameFieldStringValue = "\(self.controllerDisplayName(controller)).jmpmap"
+
+        savePanel.begin { [weak self] response in
             guard response == .OK else { return }
-            guard let filePath = savePanel.url?.absoluteString.removingPercentEncoding else { return }
+            guard let url = savePanel.url else { return }
+
+            do {
+                try dataManager.exportControllerConfig(controller.data, to: url)
+            } catch {
+                self?.showOperationError(error)
+            }
         }
-        */
     }
     
     // MARK: - Options
