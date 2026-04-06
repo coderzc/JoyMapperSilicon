@@ -22,6 +22,7 @@ let controllerTypeOutputReport: [UInt8] = [
 /// The manager class to handle controller connection/disconnection events
 public class JoyConManager {
     private static let matchTimeout: TimeInterval = 3.0
+    private static let typeQueryRetryDelay: TimeInterval = 0.8
 
     static let vendorID: Int32 = 0x057E
     static let joyConLID: Int32 = 0x2006 // Joy-Con (L)
@@ -65,9 +66,30 @@ public class JoyConManager {
         self.log("Cleared pending match (\(reason)) for \(self.deviceDescription(device))")
     }
 
+    private func requestControllerType(for device: IOHIDDevice, reason: String) {
+        let result = IOHIDDeviceSetReport(device, kIOHIDReportTypeOutput, CFIndex(0x01), controllerTypeOutputReport, controllerTypeOutputReport.count)
+        if result != kIOReturnSuccess {
+            self.clearMatch(for: device, reason: "set-report-error")
+            self.log(String(format: "Failed to query controller type (%@) for %@, IOHIDDeviceSetReport error: %d", reason, self.deviceDescription(device), result))
+            return
+        }
+        self.log("Requested controller type (\(reason)) for \(self.deviceDescription(device))")
+    }
+
+    private func scheduleTypeQueryRetry(for device: IOHIDDevice, startedAt: Date) {
+        DispatchQueue.global().asyncAfter(deadline: .now() + JoyConManager.typeQueryRetryDelay) { [weak self] in
+            guard let self = self else { return }
+            guard let currentStartedAt = self.matchingControllers[device] else { return }
+            guard currentStartedAt == startedAt else { return }
+            self.log("Retrying controller type query after short delay for \(self.deviceDescription(device))")
+            self.requestControllerType(for: device, reason: "delayed-retry")
+        }
+    }
+
     private func scheduleMatchTimeout(for device: IOHIDDevice) {
         let startedAt = Date()
         self.matchingControllers[device] = startedAt
+        self.scheduleTypeQueryRetry(for: device, startedAt: startedAt)
 
         DispatchQueue.global().asyncAfter(deadline: .now() + JoyConManager.matchTimeout) { [weak self] in
             guard let self = self else { return }
@@ -107,13 +129,7 @@ public class JoyConManager {
 
         self.log("Matched HID device \(self.deviceDescription(device))")
         self.scheduleMatchTimeout(for: device)
-        let result = IOHIDDeviceSetReport(device, kIOHIDReportTypeOutput, CFIndex(0x01), controllerTypeOutputReport, controllerTypeOutputReport.count);
-        if (result != kIOReturnSuccess) {
-            self.clearMatch(for: device, reason: "set-report-error")
-            self.log(String(format: "Failed to query controller type for %@, IOHIDDeviceSetReport error: %d", self.deviceDescription(device), result))
-            return
-        }
-        self.log("Requested controller type for \(self.deviceDescription(device))")
+        self.requestControllerType(for: device, reason: "initial")
     }
 
     func handleControllerType(device: IOHIDDevice, result: IOReturn, value: IOHIDValue) {

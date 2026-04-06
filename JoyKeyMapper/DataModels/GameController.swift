@@ -189,6 +189,7 @@ class GameController {
     }
     
     func buttonPressHandler(button: JoyCon.Button) {
+        self.updateAccessTime()
         guard let config = self.currentConfig[button] else { return }
         self.buttonPressHandler(config: config)
     }
@@ -252,6 +253,7 @@ class GameController {
     }
     
     func buttonReleaseHandler(button: JoyCon.Button) {
+        self.updateAccessTime()
         guard let config = self.currentConfig[button] else { return }
         self.buttonReleaseHandler(config: config)
     }
@@ -350,6 +352,9 @@ class GameController {
     }
     
     func leftStickHandler(newDirection: JoyCon.StickDirection, oldDirection: JoyCon.StickDirection) {
+        if newDirection != .Neutral || oldDirection != .Neutral {
+            self.updateAccessTime()
+        }
         if self.currentLStickMode == .Key {
             if let config = self.currentLStickConfig[oldDirection] {
                 self.buttonReleaseHandler(config: config)
@@ -409,6 +414,9 @@ class GameController {
     }
 
     func rightStickHandler(newDirection: JoyCon.StickDirection, oldDirection: JoyCon.StickDirection) {
+        if newDirection != .Neutral || oldDirection != .Neutral {
+            self.updateAccessTime()
+        }
         if self.currentRStickMode == .Key {
             if let config = self.currentRStickConfig[oldDirection] {
                 self.buttonReleaseHandler(config: config)
@@ -422,6 +430,9 @@ class GameController {
     }
 
     func leftStickPosHandler(pos: CGPoint) {
+        if pos.x != 0 || pos.y != 0 {
+            self.updateAccessTime()
+        }
         let speed = CGFloat(self.currentConfigData.leftStick?.speed ?? 0)
         if self.currentLStickMode == .Mouse {
             self.stickMouseHandler(pos: pos, speed: speed)
@@ -431,6 +442,9 @@ class GameController {
     }
     
     func rightStickPosHandler(pos: CGPoint) {
+        if pos.x != 0 || pos.y != 0 {
+            self.updateAccessTime()
+        }
         let speed = CGFloat(self.currentConfigData.rightStick?.speed ?? 0)
         if self.currentRStickMode == .Mouse {
             self.stickMouseHandler(pos: pos, speed: speed)
